@@ -4,9 +4,16 @@ import bridges.base.GraphAdjList;
 import bridges.connect.Bridges;
 import bridges.data_src_dependent.OsmVertex;
 
+import java.io.BufferedReader;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+
+import bridges.base.Edge;
+import bridges.base.SLelement;
+import java.io.BufferedWriter;
+import java.nio.file.Files;
+import java.util.ArrayList;
 
 /**
  * Part 0: load the map from the BRIDGES server the first time, save it to a
@@ -70,7 +77,62 @@ public final class MapLoader {
      */
     static void write(GraphAdjList<Integer, OsmVertex, Double> graph, String place, String level, Path file)
             throws IOException {
-        throw new UnsupportedOperationException("Part 0: write MapLoader.write");
+        Files.createDirectories(file.getParent());
+
+        int edgeCount = 0;
+        for (int from : graph.getVertices().keySet()) {
+            SLelement<Edge<Integer, Double>> node =
+                    graph.getAdjacencyList(from);
+
+            while (node != null) {
+                edgeCount++;
+                node = node.getNext();
+            }
+        }
+
+        try (BufferedWriter writer = Files.newBufferedWriter(file)) {
+            writer.write("place " + place);
+            writer.newLine();
+            writer.write("level " + level);
+            writer.newLine();
+            writer.write("vertices " + graph.getVertices().size());
+            writer.newLine();
+
+            for (int id : graph.getVertices().keySet()) {
+                OsmVertex vertex = graph.getVertexData(id);
+                double x = graph.getVertex(id).getVisualizer().getLocationX();
+                double y = graph.getVertex(id).getVisualizer().getLocationY();
+
+                writer.write(id + " "
+                        + vertex.getLatitude() + " "
+                        + vertex.getLongitude() + " "
+                        + x + " " + y);
+                writer.newLine();
+            }
+
+            writer.write("edges " + edgeCount);
+            writer.newLine();
+
+            for (int from : graph.getVertices().keySet()) {
+                ArrayList<Edge<Integer, Double>> edges = new ArrayList<>();
+                SLelement<Edge<Integer, Double>> node =
+                        graph.getAdjacencyList(from);
+
+                while (node != null) {
+                    edges.add(node.getValue());
+                    node = node.getNext();
+                }
+
+                for (int i = edges.size() - 1; i >= 0; i--) {
+                    Edge<Integer, Double> edge = edges.get(i);
+                    writer.write(from + " "
+                            + edge.getTo() + " "
+                            + edge.getEdgeData());
+                    writer.newLine();
+                }
+            }
+        }
+        //throw new UnsupportedOperationException("Part 0: write MapLoader.write");
     }
 
     /**
@@ -84,6 +146,87 @@ public final class MapLoader {
      *         or a number does not parse
      */
     static GraphAdjList<Integer, OsmVertex, Double> read(Path file) throws IOException {
-        throw new UnsupportedOperationException("Part 0: write MapLoader.read");
+        GraphAdjList<Integer, OsmVertex, Double> graph = new GraphAdjList<>();
+
+        try (BufferedReader reader = Files.newBufferedReader(file)) {
+            // Consume the place and level headers without interpreting them.
+            if (reader.readLine() == null || reader.readLine() == null) {
+                throw new IOException("Missing place or level header");
+            }
+
+            String line = reader.readLine();
+            if (line == null) {
+                throw new IOException("Missing vertices count");
+            }
+
+            String[] fields = line.split(" ");
+            if (fields.length != 2 || !fields[0].equals("vertices")) {
+                throw new IOException("Invalid vertices count line");
+            }
+
+            int vertexCount = Integer.parseInt(fields[1]);
+            if (vertexCount < 0) {
+                throw new IOException("Negative vertex count");
+            }
+
+            for (int i = 0; i < vertexCount; i++) {
+                line = reader.readLine();
+                if (line == null) {
+                    throw new IOException("File ended before vertex record " + i);
+                }
+
+                fields = line.split(" ");
+                if (fields.length != 5) {
+                    throw new IOException("Vertex record " + i + " needs 5 fields");
+                }
+
+                int id = Integer.parseInt(fields[0]);
+                double latitude = Double.parseDouble(fields[1]);
+                double longitude = Double.parseDouble(fields[2]);
+                double x = Double.parseDouble(fields[3]);
+                double y = Double.parseDouble(fields[4]);
+
+                graph.addVertex(id, new OsmVertex(latitude, longitude));
+                graph.getVertex(id).setLocation(x, y);
+            }
+
+            line = reader.readLine();
+            if (line == null) {
+                throw new IOException("Missing edges count");
+            }
+
+            fields = line.split(" ");
+            if (fields.length != 2 || !fields[0].equals("edges")) {
+                throw new IOException("Invalid edges count line");
+            }
+
+            int edgeCount = Integer.parseInt(fields[1]);
+            if (edgeCount < 0) {
+                throw new IOException("Negative edge count");
+            }
+
+            for (int i = 0; i < edgeCount; i++) {
+                line = reader.readLine();
+                if (line == null) {
+                    throw new IOException("File ended before edge record " + i);
+                }
+
+                fields = line.split(" ");
+                if (fields.length != 3) {
+                    throw new IOException("Edge record " + i + " needs 3 fields");
+                }
+
+                int from = Integer.parseInt(fields[0]);
+                int to = Integer.parseInt(fields[1]);
+                double length = Double.parseDouble(fields[2]);
+
+                graph.addEdge(from, to, length);
+            }
+
+            return graph;
+        } catch (NumberFormatException e) {
+            throw new IOException("Invalid number in map file", e);
+        }
+        //throw new UnsupportedOperationException("Part 0: write MapLoader.read");
     }
 }
