@@ -1,0 +1,16 @@
+# Your API key lives here. Never commit it.
+.env
+
+# Maven build output
+target/
+
+# IDE noise
+.idea/
+*.iml
+.vscode/
+.classpath
+.project
+.settings/
+
+# The map, saved on your first run. Delete it to fetch the map again.
+data/
