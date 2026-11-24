@@ -37,4 +37,43 @@ class Part1Test {
     //     RoutePlanner.bfs(g, 0, steps, new HashMap<>());
     //     assertEquals(0, steps.get(0));
     // }
+    @Test
+    void testBFS() {
+        GraphAdjList<Integer, String, Double> g = graph(
+                4, new double[][] {{0, 1, 1}, {0, 2, 2}, {1, 3, 3}}
+        );
+        HashMap<Integer, Integer> steps = new HashMap<>();
+        HashMap<Integer, Integer> parent = new HashMap<>();
+
+        RoutePlanner.bfs(g, 0, steps, parent);
+
+        assertEquals(Map.of(0, 0, 1, 1, 2, 1, 3, 2), steps);
+    }
+
+    @Test
+    void testParent() {
+        GraphAdjList<Integer, String, Double> g = graph(
+                4, new double[][] {{0, 1, 1}, {0, 2, 2}, {1, 3, 3}}
+        );
+        HashMap<Integer, Integer> steps = new HashMap<>();
+        HashMap<Integer, Integer> parent = new HashMap<>();
+
+        RoutePlanner.bfs(g, 0, steps, parent);
+
+        assertEquals(Map.of(1, 0, 2, 0, 3, 1), parent);
+    }
+
+    @Test
+    void testRouteTo() {
+        GraphAdjList<Integer, String, Double> g = graph(
+                4, new double[][] {{0, 1, 1}, {0, 2, 2}, {1, 3, 3}}
+        );
+        HashMap<Integer, Integer> steps = new HashMap<>();
+        HashMap<Integer, Integer> parent = new HashMap<>();
+
+        RoutePlanner.bfs(g, 0, steps, parent);
+
+        assertEquals(List.of(0, 1, 3), RoutePlanner.routeTo(parent, 0, 3));
+    }
+
 }

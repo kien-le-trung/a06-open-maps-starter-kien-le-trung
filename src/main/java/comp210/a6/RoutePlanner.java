@@ -1,9 +1,10 @@
 package comp210.a6;
 
+import bridges.base.Edge;
 import bridges.base.GraphAdjList;
+import bridges.base.SLelement;
 
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
 
 /**
  * Route finding on a road graph. Vertex keys are ints, and each edge holds
@@ -31,7 +32,26 @@ public class RoutePlanner {
      */
     public static void bfs(GraphAdjList<Integer, ?, Double> graph, int source,
                            HashMap<Integer, Integer> steps, HashMap<Integer, Integer> parent) {
-        throw new UnsupportedOperationException("Part 1: write RoutePlanner.bfs");
+        Queue<Integer> queue = new ArrayDeque<>();
+
+        queue.add(source);
+        steps.put(source, 0);
+
+        while (!queue.isEmpty()) {
+            int v = queue.poll();
+            SLelement<Edge<Integer,Double>> from = graph.getAdjacencyList(v);
+            while (from != null) {
+                int node = from.getValue().getTo();
+                if (!steps.containsKey(node)) {
+                    parent.put(node, v);
+                    steps.put(node, steps.get(v) + 1);
+                    queue.add(node);
+                }
+                from = from.getNext();
+            }
+        }
+
+        //throw new UnsupportedOperationException("Part 1: write RoutePlanner.bfs");
     }
 
     /**
@@ -40,7 +60,28 @@ public class RoutePlanner {
      * destination. Returns an empty list when destination was not reached.
      */
     public static List<Integer> routeTo(HashMap<Integer, Integer> parent, int source, int destination) {
-        throw new UnsupportedOperationException("Part 1: write RoutePlanner.routeTo");
+        List<Integer> retval = new ArrayList<>();
+
+        if (source == destination) {
+            retval.add(source);
+            return retval;
+        }
+
+        if (!parent.containsKey(destination)) {
+            return retval;
+        }
+
+        int curr = destination;
+        while (curr != source) {
+            retval.add(curr);
+            curr = parent.get(curr);
+        }
+        retval.add(source);
+        Collections.reverse(retval);
+
+        return retval;
+
+        // throw new UnsupportedOperationException("Part 1: write RoutePlanner.routeTo");
     }
 
     // ------------------------------------------------------------------

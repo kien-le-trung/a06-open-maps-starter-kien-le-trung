@@ -64,4 +64,103 @@ class Part0Test {
     //     MapLoader.write(threeCorners(), "Chapel Hill, North Carolina", "tertiary", file);
     //     assertEquals("place Chapel Hill, North Carolina", Files.readAllLines(file).get(0));
     // }
+    @Test
+    void writeTest() throws IOException {
+        GraphAdjList<Integer, OsmVertex, Double> graph = new GraphAdjList<>();
+
+        graph.addVertex(0, new OsmVertex(1.0, 2.0));
+        graph.getVertex(0).setLocation(3.0, 4.0);
+
+        graph.addVertex(1, new OsmVertex(5.0, 6.0));
+        graph.getVertex(1).setLocation(7.0, 8.0);
+
+        graph.addVertex(2, new OsmVertex(9.0, 10.0));
+        graph.getVertex(2).setLocation(11.0, 12.0);
+
+        graph.addEdge(0, 1, 2.0);
+        graph.addEdge(0, 2, 3.0);
+
+        Path file = dir.resolve("map.txt");
+        MapLoader.write(graph, "test", "tertiary", file);
+
+        List<String> expected = List.of(
+                "place test",
+                "level tertiary",
+                "vertices 3",
+                "0 1.0 2.0 3.0 4.0",
+                "1 5.0 6.0 7.0 8.0",
+                "2 9.0 10.0 11.0 12.0",
+                "edges 2",
+                "0 1 2.0",
+                "0 2 3.0"
+        );
+
+        assertEquals(expected, Files.readAllLines(file));
+    }
+
+    @Test
+    void readTest() throws IOException {
+        Path file = dir.resolve("map.txt");
+        Files.write(file, List.of(
+                "place test",
+                "level tertiary",
+                "vertices 3",
+                "0 1.0 2.0 3.0 4.0",
+                "1 5.0 6.0 7.0 8.0",
+                "2 9.0 10.0 11.0 12.0",
+                "edges 2",
+                "0 1 2.0",
+                "0 2 3.0"
+        ));
+
+        GraphAdjList<Integer, OsmVertex, Double> graph = MapLoader.read(file);
+
+        assertEquals(3, graph.getVertices().size());
+
+        // Each row contains latitude, longitude, drawing x, and drawing y.
+        double[][] expected = {
+                {1.0, 2.0, 3.0, 4.0},
+                {5.0, 6.0, 7.0, 8.0},
+                {9.0, 10.0, 11.0, 12.0}
+        };
+
+        for (int id = 0; id < expected.length; id++) {
+            assertNotNull(graph.getVertex(id));
+
+            OsmVertex vertex = graph.getVertexData(id);
+            assertEquals(expected[id][0], vertex.getLatitude(), 1e-9);
+            assertEquals(expected[id][1], vertex.getLongitude(), 1e-9);
+            assertEquals(expected[id][2],
+                    graph.getVertex(id).getVisualizer().getLocationX(), 1e-9);
+            assertEquals(expected[id][3],
+                    graph.getVertex(id).getVisualizer().getLocationY(), 1e-9);
+        }
+
+        assertEquals(List.of("2/3.0", "1/2.0"), listOf(graph, 0));
+        assertEquals(List.of(), listOf(graph, 1));
+        assertEquals(List.of(), listOf(graph, 2));
+    }
+
+    @Test
+    void readRejectsMissingVertexCount() throws IOException {
+        Path file = dir.resolve("missing-vertex-count.txt");
+        Files.write(file, List.of(
+                "place test",
+                "level tertiary",
+                "vertices",
+                "0 1.0 2.0 3.0 4.0",
+                "1 5.0 6.0 7.0 8.0",
+                "2 9.0 10.0 11.0 12.0",
+                "edges 2",
+                "0 1 2.0",
+                "0 2 3.0"
+        ));
+
+        IOException exception = org.junit.jupiter.api.Assertions.assertThrows(
+                IOException.class,
+                () -> MapLoader.read(file)
+        );
+
+        assertEquals("Invalid vertices count line", exception.getMessage());
+    }
 }
