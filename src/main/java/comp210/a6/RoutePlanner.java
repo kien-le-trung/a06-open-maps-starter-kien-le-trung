@@ -107,7 +107,54 @@ public class RoutePlanner {
      */
     public static void dijkstra(GraphAdjList<Integer, ?, Double> graph, int source,
                                 HashMap<Integer, Double> distance, HashMap<Integer, Integer> parent) {
-        throw new UnsupportedOperationException("Part 2: write RoutePlanner.dijkstra");
+        PriorityQueue<Pair<Integer, Double>> queue = new PriorityQueue<>();
+        HashSet<Integer> settled = new HashSet<>();
+        double lastDist = -1.0;
+
+        // populate all edges
+        for (Integer vertex : graph.getVertices().keySet()) {
+            distance.put(vertex,Double.MAX_VALUE);
+        }
+        distance.put(source, 0.0);
+        queue.add(new Pair<>(source,0.0));
+
+        while (!queue.isEmpty()) {
+            Pair<Integer, Double> curr = queue.poll();
+            int currNode =  curr.getKey();
+            double currDist = curr.getValue();
+            if (settled.contains(currNode)) {
+                continue;
+            }
+            if (currDist > distance.get(currNode)) {
+                continue;
+            }
+            if (currDist < lastDist) {
+                throw new IllegalStateException("Check 1 fails at vertex " + currNode + ". currDist: " + currDist + " < lastDist: " + lastDist);
+            }
+            settled.add(currNode);
+            SLelement<Edge<Integer,Double>> from = graph.getAdjacencyList(currNode);
+            while (from != null) {
+                int neighbor =  from.getValue().getTo();
+                Edge<Integer,Double> edge = from.getValue();
+
+                // check min value and update
+                if (distance.containsKey(neighbor)) {
+                    if (distance.get(neighbor) > distance.get(currNode) + edge.getEdgeData()) {
+                        if (settled.contains(neighbor)) {
+                            throw new IllegalStateException("Check 2 failed. Node "+neighbor+" is already settled");
+                        }
+                        distance.put(neighbor, distance.get(currNode) + edge.getEdgeData());
+                        parent.put(neighbor, currNode);
+                        queue.add(new Pair<>(neighbor, distance.get(currNode) + edge.getEdgeData()));
+                    }
+                }
+
+                from = from.getNext();
+            }
+            lastDist = currDist;
+        }
+
+        // throw new UnsupportedOperationException("Part 2: write RoutePlanner.dijkstra");
     }
 
     /**
