@@ -29,9 +29,9 @@ public class Main {
     // right-click it, choose "Show address", and copy the latitude and
     // longitude. Your write-up numbers come from this destination.
     // ------------------------------------------------------------------
-    static final String DESTINATION_NAME = "the Friday Center";
-    static final double DESTINATION_LATITUDE = 35.8997744;
-    static final double DESTINATION_LONGITUDE = -79.0125678;
+    static final String DESTINATION_NAME = "Trader Joe's";
+    static final double DESTINATION_LATITUDE = 35.9358;
+    static final double DESTINATION_LONGITUDE = -79.0242;
 
     /** Sitterson Hall, home of UNC Computer Science, from OpenStreetMap. */
     static final double SITTERSON_LATITUDE = 35.9099702;
