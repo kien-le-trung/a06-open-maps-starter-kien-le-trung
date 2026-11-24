@@ -53,7 +53,35 @@ public final class MapLoader {
      */
     public static GraphAdjList<Integer, OsmVertex, Double> load(Bridges bridges, String place, String level)
             throws IOException {
-        throw new UnsupportedOperationException("Part 0: write MapLoader.load");
+        Path file = cacheFile(place, level);
+
+        try {
+            if (Files.exists(file) && Files.size(file) > 0) {
+                GraphAdjList<Integer, OsmVertex, Double> graph = read(file);
+                System.out.println("Loaded cached map from " + file);
+                return graph;
+            }
+        } catch (IOException e) {
+            System.err.println(
+                    "Could not use cache " + file + ": " + e.getMessage()
+                            + ". Fetching from BRIDGES.");
+        }
+
+        GraphAdjList<Integer, OsmVertex, Double> graph =
+                bridges.getDataSource().getOsmData(place, level).getGraph();
+
+        try {
+            write(graph, place, level, file);
+            System.out.println(
+                    "Loaded map from BRIDGES and saved it to " + file);
+        } catch (IOException e) {
+            System.err.println(
+                    "Loaded map from BRIDGES, but could not save cache to "
+                            + file + ": " + e.getMessage());
+        }
+
+        return graph;
+        // throw new UnsupportedOperationException("Part 0: write MapLoader.load");
     }
 
     /**
