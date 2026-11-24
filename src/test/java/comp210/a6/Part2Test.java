@@ -36,4 +36,58 @@ class Part2Test {
     //     RoutePlanner.dijkstra(g, 0, distance, new HashMap<>());
     //     assertEquals(0.0, distance.get(0));
     // }
+    @Test
+    void testOne() {
+        GraphAdjList<Integer, String, Double> g = graph(4, new double[][] {
+                {0, 1, 1.0},
+                {0, 2, 2.0},
+                {0, 3, 5.0},
+                {1, 3, 2.0}
+        });
+        HashMap<Integer, Double> distance = new HashMap<>();
+        HashMap<Integer, Integer> parent = new HashMap<>();
+
+        RoutePlanner.dijkstra(g, 0, distance, parent);
+
+        assertEquals(Map.of(
+                0, 0.0,
+                1, 1.0,
+                2, 2.0,
+                3, 3.0
+        ), distance);
+    }
+
+    @Test
+    void testTwo() {
+        GraphAdjList<Integer, String, Double> g = graph(4, new double[][] {
+                {0, 1, 1.0},
+                {0, 2, -1.0},
+                {0, 3, 5.0},
+                {1, 3, 2.0}
+        });
+        HashMap<Integer, Double> distance = new HashMap<>();
+        HashMap<Integer, Integer> parent = new HashMap<>();
+
+        IllegalStateException exception = assertThrows(
+                IllegalStateException.class,
+                () -> RoutePlanner.dijkstra(g, 0, distance, parent)
+        );
+
+        assertTrue(exception.getMessage().startsWith("Check 1"));
+    }
+
+    @Test
+    void testThree() {
+        GraphAdjList<Integer, String, Double> g =
+                RoutePlanner.negativeEdgeGraph();
+        HashMap<Integer, Double> distance = new HashMap<>();
+        HashMap<Integer, Integer> parent = new HashMap<>();
+
+        IllegalStateException exception = assertThrows(
+                IllegalStateException.class,
+                () -> RoutePlanner.dijkstra(g, 0, distance, parent)
+        );
+
+        assertTrue(exception.getMessage().startsWith("Check 2"));
+    }
 }

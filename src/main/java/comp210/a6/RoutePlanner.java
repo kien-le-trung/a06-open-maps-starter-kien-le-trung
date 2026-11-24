@@ -163,6 +163,14 @@ public class RoutePlanner {
      * find a shorter route to it through the negative edge.
      */
     public static GraphAdjList<Integer, String, Double> negativeEdgeGraph() {
-        throw new UnsupportedOperationException("Part 2: write RoutePlanner.negativeEdgeGraph");
+        GraphAdjList<Integer, String, Double> graph = new GraphAdjList<>();
+        graph.addVertex(0, "Source");
+        graph.addVertex(1, "Node 1");
+        graph.addVertex(2, "Node 2");
+        graph.addEdge(0, 1, 2.0);
+        graph.addEdge(0, 2, 5.0);
+        graph.addEdge(2, 1, -4.0);
+        return graph;
+        // throw new UnsupportedOperationException("Part 2: write RoutePlanner.negativeEdgeGraph");
     }
 }

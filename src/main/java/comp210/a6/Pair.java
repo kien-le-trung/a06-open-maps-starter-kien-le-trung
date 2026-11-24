@@ -32,6 +32,7 @@ class Pair<V, D extends Comparable<D>> implements Comparable<Pair<V, D>> {
      */
     @Override
     public int compareTo(Pair<V, D> other) {
-        throw new UnsupportedOperationException("Part 2: write Pair.compareTo");
+        return this.getValue().compareTo(other.getValue());
+        //throw new UnsupportedOperationException("Part 2: write Pair.compareTo");
     }
 }
