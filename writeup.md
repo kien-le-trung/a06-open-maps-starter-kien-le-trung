@@ -167,8 +167,7 @@ in what it gave you.
 ```
 My feature shows the shortest route in part 2, and the shortest route if we make a detour to grab a coffee from
 the closest coffee shop on campus, and the estimated additional walking time needed. Many students buy coffee
-between classes everyday, so it would be useful to know if we can make it to Starbucks, then to the next class
-within our schedule.
+everyday, so it would be useful to know if we can make it to Starbucks, then to our destination within our schedule.
 
 ArrayList to store list of coffee shops. Array would be another choice, but ArrayList is resizable in case more
 coffee shops, or other shops, are added to the list.
